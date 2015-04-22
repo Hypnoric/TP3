@@ -16,6 +16,17 @@ public class PreferenceActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preference);
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String photoPath = extras.getString("photoPath");
+            String courriel = extras.getString("courriel");
+            String groupe = extras.getString("groupe");
+            boolean restaurant = extras.getBoolean("restaurant");
+            boolean parc = extras.getBoolean("parc");
+            boolean cinema = extras.getBoolean("cinema");
+        }
+
     }
 
     @Override

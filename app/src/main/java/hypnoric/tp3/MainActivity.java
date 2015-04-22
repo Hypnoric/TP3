@@ -51,12 +51,35 @@ public class MainActivity extends ActionBarActivity {
 
     public void preferenceBtnOnClick(View v){
         Intent intent = new Intent(this, PreferenceActivity.class);
+        String photoPath = prefs.getString("photoPath", "");
+        String courriel = prefs.getString("courriel", "");
+        String groupe = prefs.getString("groupe", "");
+        boolean restaurant = prefs.getBoolean("restaurant", false);
+        boolean parc = prefs.getBoolean("parc", false);
+        boolean cinema = prefs.getBoolean("cinema", false);
+        intent.putExtra("photoPath", photoPath);
+        intent.putExtra("courriel", courriel);
+        intent.putExtra("groupe", groupe);
+        intent.putExtra("restaurant", restaurant);
+        intent.putExtra("parc", parc);
+        intent.putExtra("cinema", cinema);
         startActivity(intent);
     }
 
     public static void setFirstTimeFalse(){
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean("firstTime", false);
+        editor.commit();
+    }
+
+    public static void savePreferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema){
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("photoPath", photoPath);
+        editor.putString("courriel", courriel);
+        editor.putString("groupe", groupe);
+        editor.putBoolean("restaurant", restaurant);
+        editor.putBoolean("parc", parc);
+        editor.putBoolean("cinema", cinema);
         editor.commit();
     }
 
