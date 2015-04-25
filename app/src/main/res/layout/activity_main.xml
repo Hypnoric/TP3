@@ -17,8 +17,17 @@
             android:layout_height="wrap_content"
             android:text="Démarrer l&apos;application"
             android:onClick="openMap"
-            android:id="@+id/buttonStart"
+            android:id="@+id/buttonMap"
             android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="30dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create meeting"
+            android:onClick="createMeeting"
+            android:id="@+id/buttonMeeting"
+            android:layout_gravity="center"
             android:layout_marginTop="30dp" />
 
         <Button

@@ -49,6 +49,11 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
+    public void createMeeting(View v) {
+        Intent intent = new Intent(this, MeetingActivity.class);
+        startActivity(intent);
+    }
+
     public void preferenceBtnOnClick(View v){
         Intent intent = new Intent(this, PreferenceActivity.class);
         String photoPath = prefs.getString("photoPath", "");
