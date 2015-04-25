@@ -3,18 +3,33 @@ package hypnoric.tp3;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.session.AppKeyPair;
+
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
+
+import java.io.File;
+
 
 public class MainActivity extends ActionBarActivity {
 
-    private static SharedPreferences prefs;
+    public static SharedPreferences prefs;
     boolean firstTime;
     static final int PREF_FINISHED = 1;
+    final static private String APP_KEY = "xzo6z6zc0s3tf3p";
+    final static private String APP_SECRET = "4y4dtrm7zzlo049";
+    final static private String AUTH_TOKEN = "GJI0AgLtbpAAAAAAAAAABo7e4UYwBTu71C1ZAA4yKGrz2YGPVlqtM6SST2NukECB";
+    public static DropboxAPI<AndroidAuthSession> mDBApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,8 +37,32 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
         prefs = getPreferences(Context.MODE_PRIVATE);
 
+        AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
+        AndroidAuthSession session = new AndroidAuthSession(appKeys, AUTH_TOKEN);
+        mDBApi = new DropboxAPI<AndroidAuthSession>(session);
+
+        //UploadFileToDropbox upload = new UploadFileToDropbox(this, mDBApi, "/tp3/");
+        //upload.execute();
+        //mDBApi.getSession().startOAuth2Authentication(this);
+
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (mDBApi.getSession().authenticationSuccessful()) {
+            try {
+                // Required to complete auth, sets the access token on the session
+                mDBApi.getSession().finishAuthentication();
+
+                String accessToken = mDBApi.getSession().getOAuth2AccessToken();
+            } catch (IllegalStateException e) {
+                Log.i("DbAuthLog", "Error authenticating", e);
+            }
+        }
     }
 
     public void nextStep(){
@@ -66,20 +105,11 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    public static void setFirstTimeFalse(){
+    public static void updatePosition(double latitude, double longitude)
+    {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("firstTime", false);
-        editor.commit();
-    }
-
-    public static void savePreferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema){
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("photoPath", photoPath);
-        editor.putString("courriel", courriel);
-        editor.putString("groupe", groupe);
-        editor.putBoolean("restaurant", restaurant);
-        editor.putBoolean("parc", parc);
-        editor.putBoolean("cinema", cinema);
+        editor.putFloat("latitude", (float)latitude);
+        editor.putFloat("longitude", (float)longitude);
         editor.commit();
     }
 

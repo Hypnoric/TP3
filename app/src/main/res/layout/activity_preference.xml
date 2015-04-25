@@ -31,14 +31,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/checkBoxPhoto"
-            android:layout_gravity="right|top"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="70dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Courriel"
             android:id="@+id/textView3"
@@ -71,7 +63,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="GroupName"
             android:ems="10"
             android:id="@+id/groupNameText"
             android:layout_gravity="right|center_vertical"
@@ -118,11 +109,21 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sauvergarder et Quitter"
+            android:text="Sauvegarder et Quitter"
             android:onClick="saveBtnOnClick"
             android:id="@+id/buttonQuit"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="50dp" />
+
+        <TextView
+            android:layout_width="177dp"
+            android:layout_height="55dp"
+            android:ems="10"
+            android:id="@+id/photoText"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="70dp"
+            android:layout_marginRight="50dp"
+            android:inputType="none" />
 
     </FrameLayout>
 </RelativeLayout>
