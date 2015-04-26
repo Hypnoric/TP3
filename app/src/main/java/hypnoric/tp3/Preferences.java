@@ -9,9 +9,13 @@ import org.simpleframework.xml.Root;
 @Root
 public class Preferences
 {
-    public Preferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude)
+    public Preferences()
     {
-        SetPhotoPath(photoPath);
+    }
+
+    public Preferences(String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude)
+    {
+        //SetPhotoPath(photoPath);
         SetCourriel(courriel);
         SetGroupe(groupe);
         SetRestaurant(restaurant);
@@ -47,18 +51,18 @@ public class Preferences
         Longitude = longitude;
     }
 
-    @Element
-    private String PhotoPath;
+    //@Element
+    //private String PhotoPath;
 
-    public String GetPhotoPath()
-    {
-        return PhotoPath;
-    }
+    //public String GetPhotoPath()
+    //{
+    //    return PhotoPath;
+    //}
 
-    public void SetPhotoPath(String photoPath)
-    {
-        PhotoPath = photoPath;
-    }
+    //public void SetPhotoPath(String photoPath)
+    //{
+    //    PhotoPath = photoPath;
+    //}
 
     @Element
     private String Courriel;
@@ -131,8 +135,8 @@ public class Preferences
         if (inObject instanceof Preferences)
         {
             Preferences inPerson = (Preferences)inObject;
-            return this.PhotoPath.equalsIgnoreCase(inPerson.PhotoPath)
-                    && this.Courriel.equalsIgnoreCase(inPerson.Courriel)
+            //return this.PhotoPath.equalsIgnoreCase(inPerson.PhotoPath)
+            return this.Courriel.equalsIgnoreCase(inPerson.Courriel)
                     && this.Groupe.equalsIgnoreCase(inPerson.Groupe)
                     && this.Restaurant == inPerson.Restaurant
                     && this.Parc == inPerson.Parc

@@ -131,7 +131,7 @@ public class PreferenceActivity extends ActionBarActivity {
         double latitude = MainActivity.prefs.getFloat("latitude", 0);
         double longitude = MainActivity.prefs.getFloat("longitude", 0);
 
-        Preferences preferencesUser = new Preferences(photoPath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
+        Preferences preferencesUser = new Preferences(courriel, groupe, restaurant, parc, cinema, latitude, longitude);
         final String androidId = Settings.Secure.getString(
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         File xmlFile = new File(getFilesDir().getPath() + "/" + androidId + ".xml");

@@ -3,6 +3,7 @@ package hypnoric.tp3;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.preference.Preference;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -10,15 +11,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.session.AppKeyPair;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.Map;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -30,6 +37,11 @@ public class MainActivity extends ActionBarActivity {
     final static private String APP_SECRET = "4y4dtrm7zzlo049";
     final static private String AUTH_TOKEN = "GJI0AgLtbpAAAAAAAAAABo7e4UYwBTu71C1ZAA4yKGrz2YGPVlqtM6SST2NukECB";
     public static DropboxAPI<AndroidAuthSession> mDBApi;
+    public static ArrayList<Preferences> usersInGroup;
+    //public static String file;
+    //public static Preferences user;
+    public static DropboxAPI.Entry dirent;
+    //public static DropboxAPI.DropboxFileInfo info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +52,79 @@ public class MainActivity extends ActionBarActivity {
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys, AUTH_TOKEN);
         mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-
-        //UploadFileToDropbox upload = new UploadFileToDropbox(this, mDBApi, "/tp3/");
-        //upload.execute();
-        //mDBApi.getSession().startOAuth2Authentication(this);
-
+        //users = new ArrayList<Preferences>();
+        final String androidId = Settings.Secure.getString(
+                this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        usersInGroup = getUsersSameGroup(androidId);
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
+    }
+
+    static public ArrayList<Preferences> getUsersSameGroup(String androidId)
+    {
+        final ArrayList<Preferences> users = new ArrayList<Preferences>();
+        androidId = androidId + ".xml";
+        dirent = null;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MainActivity.dirent = mDBApi.metadata("/tp3/", 1000, null, true, null);
+                } catch (DropboxException e) {
+                    e.printStackTrace();
+                }
+            }});
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<String> files = new ArrayList<String>();
+        for (DropboxAPI.Entry ent: dirent.contents)
+        {
+            files.add(ent.fileName());// Add it to the list of thumbs we can choose from
+        }
+
+        for (int i = 0; i < files.size(); ++i){
+            if(!files.get(i).equals(androidId)) {
+                final String parameter = files.get(i); // the final is important
+                Thread t2 = new Thread(new Runnable() {
+                    String p = parameter;
+
+                    public void run() {
+                        try {
+                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                            DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/" + p, null, outputStream, null);
+                            String file = new String(outputStream.toByteArray(),"UTF-8");
+                            //System.out.println("Metadata: " + file);
+                            //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+
+                            Preferences user;
+                            Serializer serializer = new Persister();
+                            user = serializer.read(Preferences.class, file);
+
+                            String groupe = MainActivity.prefs.getString("groupe", "");
+
+                            if (user.GetGroupe().equals(groupe)) {
+                                users.add(user);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                t2.start();
+                try {
+                    t2.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return  users;
     }
 
     @Override
