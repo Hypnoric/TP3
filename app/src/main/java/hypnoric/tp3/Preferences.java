@@ -13,9 +13,9 @@ public class Preferences
     {
     }
 
-    public Preferences(String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude)
+    public Preferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude)
     {
-        //SetPhotoPath(photoPath);
+        SetPhotoPath(photoPath);
         SetCourriel(courriel);
         SetGroupe(groupe);
         SetRestaurant(restaurant);
@@ -51,18 +51,18 @@ public class Preferences
         Longitude = longitude;
     }
 
-    //@Element
-    //private String PhotoPath;
+    @Element
+    private String PhotoPath;
 
-    //public String GetPhotoPath()
-    //{
-    //    return PhotoPath;
-    //}
+    public String GetPhotoPath()
+    {
+        return PhotoPath;
+    }
 
-    //public void SetPhotoPath(String photoPath)
-    //{
-    //    PhotoPath = photoPath;
-    //}
+    public void SetPhotoPath(String photoPath)
+    {
+        PhotoPath = photoPath;
+    }
 
     @Element
     private String Courriel;
