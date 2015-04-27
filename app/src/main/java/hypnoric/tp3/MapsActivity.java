@@ -373,6 +373,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
     }
 
+    private void refresh(View v){
+
+    }
+
     @Override
     protected void onPause() {
         super.onPause();

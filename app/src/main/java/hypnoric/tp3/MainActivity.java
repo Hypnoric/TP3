@@ -81,6 +81,9 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
 
+        if(dirent == null)
+            return users;
+
         ArrayList<String> files = new ArrayList<String>();
         for (DropboxAPI.Entry ent: dirent.contents)
         {
