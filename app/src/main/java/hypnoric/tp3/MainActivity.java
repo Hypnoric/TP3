@@ -43,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
     //public static String file;
     public static Preferences user;
     public static DropboxAPI.Entry dirent;
+    public static String androidId;
     //public static DropboxAPI.DropboxFileInfo info;
 
     @Override
@@ -50,6 +51,7 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         prefs = getPreferences(Context.MODE_PRIVATE);
+        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         AppKeyPair appKeys = new AppKeyPair(APP_KEY, APP_SECRET);
         AndroidAuthSession session = new AndroidAuthSession(appKeys, AUTH_TOKEN);
@@ -191,12 +193,9 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    public static void updatePosition(double latitude, double longitude, String androidId, String path, Activity currentActivity)
+    public static void updatePosition(double latitude, double longitude, String path, Activity currentActivity)
     {
-        /*Ce qui doit etre passé en parametre pour android id
-        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        Comment obtenir path
+        /*Comment obtenir path
         path = getFilesDir().getPath()
 
         current activity est le this d'ou on appel la fonction
