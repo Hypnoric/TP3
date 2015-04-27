@@ -96,6 +96,7 @@ public class AsyncEventRetriever extends AsyncQueryHandler {
                         Meeting.AddEvent(event);
                     }
                     while(cursor.moveToNext());
+                    Meeting.CalendarQueryCompleted();
                 }
             }
         }

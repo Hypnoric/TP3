@@ -79,12 +79,6 @@ public class MainActivity extends ActionBarActivity {
 
     public void openMap(View v){
         Intent intent = new Intent(this, MapsActivity.class);
-        /*intent.putExtra("depart", depart);
-        intent.putExtra("arrivee", arrivee);
-        intent.putExtra("zoomFactor", zoomFactor);
-        intent.putExtra("locatingFrequency", locatingFrequency);
-        intent.putExtra("replay", false);
-        intent.putExtra("numeroTrajet", 0);*/
         startActivity(intent);
     }
 

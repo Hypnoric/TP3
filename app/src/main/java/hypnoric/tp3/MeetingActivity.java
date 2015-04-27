@@ -17,6 +17,8 @@ import android.provider.CalendarContract.Calendars;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -31,7 +33,7 @@ public class MeetingActivity extends ActionBarActivity {
     private ListView listView;
     private ArrayAdapter<String> adapter;
     private ArrayList<String> listItems=new ArrayList<String>();
-
+    private ArrayList<CalendarEvent> events=new ArrayList<CalendarEvent>();
 
 
     @Override
@@ -73,6 +75,27 @@ public class MeetingActivity extends ActionBarActivity {
     public void AddEvent(CalendarEvent event){
         listItems.add(event.Title);
         adapter.notifyDataSetChanged();
+        events.add(event);
+    }
+
+    public void CalendarQueryCompleted(){
+        // We now have the events from current user, now we need to get every member's location
+    }
+
+    private LatLng FindCenterLocation(ArrayList<LatLng> locations){
+        LatLng finalPos;
+        double totalLat = 0;
+        double totalLng = 0;
+        int totalLocations = 0;
+        for(LatLng location : locations){
+            totalLat += location.latitude;
+            totalLng += location.longitude;
+            totalLocations += 1;
+        }
+        totalLat = totalLat/totalLocations;
+        totalLng = totalLng/totalLocations;
+        finalPos = new LatLng(totalLat, totalLng);
+        return finalPos;
     }
 
     @Override
