@@ -115,15 +115,27 @@
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="50dp" />
 
-        <TextView
-            android:layout_width="177dp"
-            android:layout_height="55dp"
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:ems="10"
-            android:id="@+id/photoText"
+            android:id="@+id/photoImg"
             android:layout_gravity="right|top"
-            android:layout_marginTop="70dp"
-            android:layout_marginRight="50dp"
-            android:inputType="none" />
+            android:layout_marginTop="50dp"
+            android:layout_marginRight="120dp"
+            android:inputType="none"
+            android:contentDescription="ProfilePicture" />
+
+        <Button
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:id="@+id/buttonPhoto"
+            android:layout_gravity="right|top"
+            android:layout_marginTop="60dp"
+            android:layout_marginRight="40dp"
+            android:onClick="photoBtnOnClick"/>
+
 
     </FrameLayout>
 </RelativeLayout>

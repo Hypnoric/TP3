@@ -1,32 +1,50 @@
 package hypnoric.tp3;
 
 import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 
 
 public class PreferenceActivity extends ActionBarActivity {
+
+    private static final int SELECT_PICTURE = 1;
+    private String selectedImagePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preference);
 
-        String photoPath = "";
         String courriel = "";
         String groupe = "";
         boolean restaurant = false;
@@ -35,15 +53,20 @@ public class PreferenceActivity extends ActionBarActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            photoPath = extras.getString("photoPath");
+            selectedImagePath = extras.getString("photoPath");
             courriel = extras.getString("courriel");
             groupe = extras.getString("groupe");
             restaurant = extras.getBoolean("restaurant");
             parc = extras.getBoolean("parc");
             cinema = extras.getBoolean("cinema");
         }
-        TextView textPhoto = (TextView)findViewById(R.id.photoText);
-        textPhoto.setText(photoPath);
+        //TextView textPhoto = (TextView)findViewById(R.id.photoText);
+        //textPhoto.setText(photoPath);
+        if(!selectedImagePath.equals("")){
+            Bitmap selectedImage = BitmapFactory.decodeFile(selectedImagePath);
+            ImageView photo = (ImageView) findViewById(R.id.photoImg);
+            photo.setImageBitmap(selectedImage);
+        }
         TextView textCourriel = (TextView)findViewById(R.id.courrierText);
         textCourriel.setText(courriel);
         TextView textGroupe = (TextView)findViewById(R.id.groupNameText);
@@ -98,21 +121,19 @@ public class PreferenceActivity extends ActionBarActivity {
 
     public void saveBtnOnClick(View v){
 
-        TextView textPhoto = (TextView)findViewById(R.id.photoText);
         TextView textCourriel = (TextView)findViewById(R.id.courrierText);
         TextView textGroupe = (TextView)findViewById(R.id.groupNameText);
         CheckBox restaurantChk = (CheckBox)findViewById(R.id.checkBoxRestaurant);
         CheckBox parcChk = (CheckBox)findViewById(R.id.checkBoxParc);
         CheckBox cinemaChk = (CheckBox)findViewById(R.id.checkBoxCinema);
 
-        String photoPath = textPhoto.getText().toString();
         String courriel = textCourriel.getText().toString();
         String groupe = textGroupe.getText().toString();
         boolean restaurant = restaurantChk.isChecked();
         boolean parc = parcChk.isChecked();
         boolean cinema = cinemaChk.isChecked();
 
-        savePreferences(photoPath, courriel, groupe, restaurant, parc, cinema);
+        savePreferences(selectedImagePath, courriel, groupe, restaurant, parc, cinema);
 
         BackToMenu(MainActivity.PREF_FINISHED);
     }
@@ -131,7 +152,7 @@ public class PreferenceActivity extends ActionBarActivity {
         double latitude = MainActivity.prefs.getFloat("latitude", 0);
         double longitude = MainActivity.prefs.getFloat("longitude", 0);
 
-        Preferences preferencesUser = new Preferences(courriel, groupe, restaurant, parc, cinema, latitude, longitude);
+        Preferences preferencesUser = new Preferences(selectedImagePath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
         final String androidId = Settings.Secure.getString(
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         File xmlFile = new File(getFilesDir().getPath() + "/" + androidId + ".xml");
@@ -148,6 +169,10 @@ public class PreferenceActivity extends ActionBarActivity {
 
         UploadFileToDropbox upload = new UploadFileToDropbox(this, MainActivity.mDBApi, "/tp3/", xmlFile);
         upload.execute();
+        File photo = new File(selectedImagePath);
+        UploadFileToDropbox uploadPhoto = new UploadFileToDropbox(this, MainActivity.mDBApi, "/tp3/", photo);
+        uploadPhoto.execute();
+        MainActivity.updateUser();
     }
 
     private void BackToMenu(int activityResult) {
@@ -164,5 +189,57 @@ public class PreferenceActivity extends ActionBarActivity {
         setResult(activityResult, returnIntent);
 
         finish();
+    }
+
+    public void photoBtnOnClick(View v) {
+        // in onCreate or any event where your want the user to
+        // select a file
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent,
+                "Select Picture"), SELECT_PICTURE);
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == SELECT_PICTURE) {
+                Uri selectedImageUri = data.getData();
+                InputStream is = null;
+                try {
+                    is = getContentResolver().openInputStream(selectedImageUri);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                selectedImagePath = getImagePath(selectedImageUri);
+
+                ImageView photo = (ImageView) findViewById(R.id.photoImg);
+                photo.setImageBitmap(bitmap);
+            }
+        }
+    }
+
+    public String getImagePath(Uri uri){
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+        cursor.moveToFirst();
+        String document_id = cursor.getString(0);
+        document_id = document_id.substring(document_id.lastIndexOf(":")+1);
+        cursor.close();
+
+        cursor = getContentResolver().query(
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                null, MediaStore.Images.Media._ID + " = ? ", new String[]{document_id}, null);
+        cursor.moveToFirst();
+        String path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+
+        return path;
     }
 }

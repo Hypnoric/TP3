@@ -1,8 +1,10 @@
 package hypnoric.tp3;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.mtp.MtpStorageInfo;
 import android.preference.Preference;
 import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
@@ -33,13 +35,13 @@ public class MainActivity extends ActionBarActivity {
     public static SharedPreferences prefs;
     boolean firstTime;
     static final int PREF_FINISHED = 1;
-    final static private String APP_KEY = "xzo6z6zc0s3tf3p";
-    final static private String APP_SECRET = "4y4dtrm7zzlo049";
-    final static private String AUTH_TOKEN = "GJI0AgLtbpAAAAAAAAAABo7e4UYwBTu71C1ZAA4yKGrz2YGPVlqtM6SST2NukECB";
+    final static private String APP_KEY = "g8m5nss0pyg969z";
+    final static private String APP_SECRET = "h335thw740zv59c";
+    final static private String AUTH_TOKEN = "GJI0AgLtbpAAAAAAAAAACWCsdvHZnZnkkuw_TBrzPxqo_pm25DASgPguEs9VadCW";
     public static DropboxAPI<AndroidAuthSession> mDBApi;
     public static ArrayList<Preferences> usersInGroup;
     //public static String file;
-    //public static Preferences user;
+    public static Preferences user;
     public static DropboxAPI.Entry dirent;
     //public static DropboxAPI.DropboxFileInfo info;
 
@@ -56,6 +58,7 @@ public class MainActivity extends ActionBarActivity {
         final String androidId = Settings.Secure.getString(
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         usersInGroup = getUsersSameGroup(androidId);
+        updateUser();
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
     }
@@ -185,12 +188,49 @@ public class MainActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    public static void updatePosition(double latitude, double longitude)
+    public static void updatePosition(double latitude, double longitude, String androidId, String path, Activity currentActivity)
     {
+        /*Ce qui doit etre passé en parametre pour android id
+        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        Comment obtenir path
+        path = getFilesDir().getPath()
+
+        current activity est le this d'ou on appel la fonction
+        currentActivity = this;*/
+
         SharedPreferences.Editor editor = prefs.edit();
         editor.putFloat("latitude", (float)latitude);
         editor.putFloat("longitude", (float)longitude);
         editor.commit();
+        updateUser();
+
+        File xmlFile = new File(path + "/" + androidId + ".xml");
+        try
+        {
+            Serializer serializer = new Persister();
+            serializer.write(user, xmlFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
+        upload.execute();
+    }
+
+    public static void updateUser()
+    {
+        String photoPath = prefs.getString("photoPath", "");
+        String courriel = prefs.getString("courriel", "");
+        String groupe = prefs.getString("groupe", "");
+        boolean restaurant = prefs.getBoolean("restaurant", false);
+        boolean parc = prefs.getBoolean("parc", false);
+        boolean cinema = prefs.getBoolean("cinema", false);
+        float latitude = prefs.getFloat("latitude", 0);
+        float longitude = prefs.getFloat("longitude", 0);
+        user = new Preferences(photoPath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
     }
 
     @Override
