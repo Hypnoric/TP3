@@ -98,27 +98,28 @@ public class MainActivity extends ActionBarActivity {
                 final String parameter = files.get(i); // the final is important
                 Thread t2 = new Thread(new Runnable() {
                     String p = parameter;
-
                     public void run() {
-                        try {
-                            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                        if(!p.equals("meeting.xml") || !p.contains(".xml")) {
+                            try {
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-                            DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/" + p, null, outputStream, null);
-                            String file = new String(outputStream.toByteArray(),"UTF-8");
-                            //System.out.println("Metadata: " + file);
-                            //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+                                DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/" + p, null, outputStream, null);
+                                String file = new String(outputStream.toByteArray(), "UTF-8");
+                                //System.out.println("Metadata: " + file);
+                                //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
 
-                            Preferences newUser;
-                            Serializer serializer = new Persister();
-                            newUser = serializer.read(Preferences.class, file);
+                                Preferences newUser;
+                                Serializer serializer = new Persister();
+                                newUser = serializer.read(Preferences.class, file);
 
-                            String groupe = MainActivity.prefs.getString("groupe", "");
+                                String groupe = MainActivity.prefs.getString("groupe", "");
 
-                            if (newUser.GetGroupe().equals(groupe)) {
-                                users.add(newUser);
+                                if (newUser.GetGroupe().equals(groupe)) {
+                                    users.add(newUser);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
                     }
                 });
@@ -282,6 +283,8 @@ public class MainActivity extends ActionBarActivity {
         boolean cinema = prefs.getBoolean("cinema", false);
         float latitude = prefs.getFloat("latitude", 0);
         float longitude = prefs.getFloat("longitude", 0);
+        if (photoPath.equals(""))
+            photoPath = "null";
         user = new Preferences(photoPath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
     }
 
