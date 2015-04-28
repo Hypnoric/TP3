@@ -102,7 +102,11 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
     }
 
     private void requestMeeting(GooglePlace place){
-
+        Meeting meeting = new Meeting();
+        meeting.SetPlace(place.getName());
+        meeting.SetDate("Soon");
+        MainActivity.UploadMeetingToDropbox(meeting,getFilesDir().getPath(), this);
+        finish();
     }
 
     @Override
