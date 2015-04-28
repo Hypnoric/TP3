@@ -55,16 +55,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private OnLocationChangedListener mListener;
     private Location mLastKnownLocation;
-    private String adresseDepart;
-    private String adresseArrivee;
-    private PointDeMarquage depart;
-    private PointDeMarquage arrivee;
     private PointDeMarquage dernierPointDeMarquage;
     private boolean destinationReached = false;
-    private Marker arriveeMarker = null;
-    //private ArrayList<PointDeMarquage> points = new ArrayList<PointDeMarquage>();
-    private HashMap<Marker, PointDeMarquage> pointMarkerMap = new HashMap<Marker, PointDeMarquage>();
-    private String provider;
+    private HashMap<Marker, Preferences> pointMarkerMap = new HashMap<Marker, Preferences>();
     private boolean trackingEnabled = false;
     private boolean locationEnabled = false;
     private float zoomFactor = 0;
@@ -84,10 +77,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public double latitude;
         public double longitude;
         public double altitude;
-        public boolean depart = false;
-        public boolean arrivee = false;
-        public double distanceRelative = 0;
-        public double distanceTotale = 0;
         public int batterieLevel = 0;
         public String direction = "";
         public String ssid = "";
@@ -111,20 +100,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            adresseDepart = extras.getString("depart");
-            adresseArrivee = extras.getString("arrivee");
             zoomFactor = extras.getFloat("zoomFactor");
             locatingFrequency = extras.getInt("locatingFrequency");
             playbackMode = extras.getBoolean("playbackMode");
             numeroTrajet = extras.getInt("numeroTrajet");
         }
-
-        /*depart = getLatLongFromAddress(adresseDepart);
-        depart.depart = true;
-        arrivee = getLatLongFromAddress(adresseArrivee);
-        arrivee.arrivee = true;
-        arrivee.latitude = 45.6060755;
-        arrivee.longitude = -73.530734;*/
 
         setContentView(R.layout.activity_maps);
         buildGoogleApiClient();
@@ -148,97 +128,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .build();
     }
 
-    private List<PointDeMarquage> getHistory(){
-        List<PointDeMarquage> ptsList = new ArrayList<PointDeMarquage>();
-        String selectQuery = "SELECT  * FROM " + "Trajet" + Integer.toString(numeroTrajet) ;
-        /*Cursor cursor = MainActivity.trajets.rawQuery(selectQuery, null);
-        if (cursor.moveToFirst()) {
-           // cursor.moveToNext();
-
-            PointDeMarquage pt1 = new PointDeMarquage();
-            pt1.index = Integer.parseInt(cursor.getString(2));
-            pt1.latitude = Double.parseDouble(cursor.getString(3));
-            pt1.longitude = Double.parseDouble(cursor.getString(4));
-            pt1.altitude = Double.parseDouble(cursor.getString(5));
-            if(Integer.parseInt(cursor.getString(6)) == 0)
-                pt1.depart = false;
-            else
-                pt1.depart = true;
-            if(Integer.parseInt(cursor.getString(7)) == 0)
-                pt1.arrivee = false;
-            else
-                pt1.arrivee = true;
-            pt1.distanceRelative = Double.parseDouble(cursor.getString(8));
-            pt1.distanceTotale = Double.parseDouble(cursor.getString(9));
-            pt1.batterieLevel = Integer.parseInt(cursor.getString(10));
-            pt1.direction = cursor.getString(11);
-            pt1.ssid = cursor.getString(12);
-            pt1.bssid = cursor.getString(13);
-            pt1.signal = Integer.parseInt(cursor.getString(14));
-            // Adding contact to list
-            ptsList.add(pt1);
-            cursor.moveToNext();
-
-            PointDeMarquage pt2 = new PointDeMarquage();
-            pt2.latitude = Double.parseDouble(cursor.getString(2));
-            pt2.longitude = Double.parseDouble(cursor.getString(3));
-            pt2.altitude = Double.parseDouble(cursor.getString(4));
-            if(Integer.parseInt(cursor.getString(5)) == 0)
-                pt2.depart = false;
-            else
-                pt2.depart = true;
-            if(Integer.parseInt(cursor.getString(6)) == 0)
-                pt2.arrivee = false;
-            else
-                pt2.arrivee = true;
-            pt2.distanceRelative = Double.parseDouble(cursor.getString(7));
-            pt2.distanceTotale = Double.parseDouble(cursor.getString(8));
-            pt2.batterieLevel = Integer.parseInt(cursor.getString(9));
-            pt2.direction = cursor.getString(10);
-            pt2.ssid = cursor.getString(11);
-            pt2.bssid = cursor.getString(12);
-            pt2.signal = Integer.parseInt(cursor.getString(13));
-            // Adding contact to list
-            ptsList.add(pt2);
-            cursor.moveToNext();*/
-/*
-            do {
-                PointDeMarquage pt = new PointDeMarquage();
-                pt.index = Integer.parseInt(cursor.getString(2));
-                pt.latitude = Double.parseDouble(cursor.getString(3));
-                pt.longitude = Double.parseDouble(cursor.getString(4));
-                pt.altitude = Double.parseDouble(cursor.getString(5));
-                if(Integer.parseInt(cursor.getString(6)) == 0)
-                    pt.depart = false;
-                else
-                    pt.depart = true;
-                if(Integer.parseInt(cursor.getString(7)) == 0)
-                    pt.arrivee = false;
-                else
-                    pt.arrivee = true;
-                pt.distanceRelative = Double.parseDouble(cursor.getString(8));
-                pt.distanceTotale = Double.parseDouble(cursor.getString(9));
-                pt.batterieLevel = Integer.parseInt(cursor.getString(10));
-                pt.direction = cursor.getString(11);
-                pt.ssid = cursor.getString(12);
-                pt.bssid = cursor.getString(13);
-                pt.signal = Integer.parseInt(cursor.getString(14));
-                // Adding contact to list
-                ptsList.add(pt);
-            } while (cursor.moveToNext());
-        }*/
-
-        // return contact list
-        return ptsList;
-    }
-
-    public class PointDeMarquageIndexComparator implements Comparator<PointDeMarquage> {
-        @Override
-        public int compare(PointDeMarquage point1, PointDeMarquage point2) {
-            return ((Integer)point1.index).compareTo(((Integer) point2.index));
-        }
-    }
-
     private void RetrievePositionInformation() {
         PointDeMarquage point = new PointDeMarquage();
         //Location location = locationManager.getLastKnownLocation(provider);
@@ -247,21 +136,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             point.latitude = location.getLatitude();
             point.longitude = location.getLongitude();
             point.altitude = location.getAltitude();
-            Marker marker = mMap.addMarker(new MarkerOptions()
+            /*Marker marker = mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(point.latitude, point.longitude))
                             //.title(markerInfo)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-            //points.add(point);
-            point.distanceRelative = SphericalUtil.computeDistanceBetween(new LatLng(point.latitude, point.longitude), new LatLng(dernierPointDeMarquage.latitude, dernierPointDeMarquage.longitude));
-            point.distanceTotale = SphericalUtil.computeDistanceBetween(new LatLng(point.latitude, point.longitude), new LatLng(depart.latitude, depart.longitude));
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));*/
 
-            double distanceToDestination = SphericalUtil.computeDistanceBetween(new LatLng(point.latitude, point.longitude), new LatLng(arrivee.latitude, arrivee.longitude));
-            if(distanceToDestination <= 10) {
-                //Less than 10 meters from destination ... considered reached
-                destinationReached = true;
-                Toast.makeText(getApplicationContext(), "You have reached your destination", Toast.LENGTH_LONG).show();
-                stopLocationUpdates();
-            }
 
             int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
@@ -293,21 +172,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 point.direction = "Inconnue";
             }
 
-            point.index = dernierPointDeMarquage.index + 1;
-
-            pointMarkerMap.put(marker, point);
-
             dernierPointDeMarquage = point;
-
-            if(destinationReached){
-                if (arrivee != null) {
-                    arrivee.index = pointMarkerMap.size() + 1;
-                    pointMarkerMap.put(arriveeMarker, arrivee);
-                    dernierPointDeMarquage = arrivee;
-                }
-                List list = sortHashMapByIndex(pointMarkerMap);
-                //MainActivity.addToDataBase(adresseDepart, adresseArrivee, (PointDeMarquage[])list.toArray(new PointDeMarquage[list.size()]));
-            }
 
             wifi.startScan();
             List<ScanResult> results = wifi.getScanResults();
@@ -325,32 +190,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }
-    }
-
-    public List<PointDeMarquage> sortHashMapByIndex(HashMap passedMap) {
-        List mapValues = new ArrayList(passedMap.values());
-        Collections.sort(mapValues, new PointDeMarquageIndexComparator());
-
-        List<PointDeMarquage> sortedList = new ArrayList();
-
-        Iterator valueIt = mapValues.iterator();
-        while (valueIt.hasNext()) {
-            Object val = valueIt.next();
-
-            sortedList.add((PointDeMarquage)val);
-            /*Object key = keyIt.next();
-            int index1 = ((PointDeMarquage)passedMap.get(key)).index;
-            int index2 = ((PointDeMarquage)val).index;
-
-            if (index1 < index2){
-                passedMap.remove(key);
-                mapKeys.remove(key);
-                sortedList.put((Marker)key, (PointDeMarquage)val);
-                break;
-            }*/
-
-        }
-        return sortedList;
     }
 
     @Override
@@ -373,8 +212,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
     }
 
-    private void refresh(View v){
-
+    public void refresh(View v){
+        //MainActivity.usersInGroup = MainActivity.getUsersSameGroup();
+        updateMarkers();
     }
 
     @Override
@@ -396,70 +236,41 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void updateMarkers(){
+        mMap.clear();
+        ArrayList<Preferences> users = MainActivity.usersInGroup;
+        if(users != null && users.size() > 1){
+            for(Preferences user : users){
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(user.GetLatitude(), user.GetLongitude()))
+                                //.title(markerInfo)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+            }
+        }
+    }
+
     @Override
     public void onMapReady(GoogleMap map) {
         mMap = map;
 
-        if(!playbackMode){
-            mMap.setMyLocationEnabled(true);
+        mMap.setMyLocationEnabled(true);
 
-            // Get the location manager
-            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            // Define the criteria how to select the locatioin provider -> use
-            // default
-            Criteria criteria = new Criteria();
-            provider = locationManager.getBestProvider(criteria, false);
+        // Get the location manager
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-            if (depart != null) {
-                Marker depMarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(depart.latitude, depart.longitude))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                pointMarkerMap.put(depMarker, depart);
-                dernierPointDeMarquage = depart;
-            }
-            if (arrivee != null) {
-                arriveeMarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(arrivee.latitude, arrivee.longitude))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+        updateMarkers();
 
-                //pointMarkerMap.put(arrMarker, arrivee);
-            }
-        }
-        else{
-            List<PointDeMarquage> playbackPoints = getHistory();
-            depart = playbackPoints.get(0);
-            if (depart != null) {
-                Marker depMarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(depart.latitude, depart.longitude))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                pointMarkerMap.put(depMarker, depart);
-                dernierPointDeMarquage = depart;
-            }
-            for(int i = 1; i < playbackPoints.size()-1; i++){
-                PointDeMarquage point = playbackPoints.get(i);
-                Marker marker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(point.latitude, point.longitude))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                pointMarkerMap.put(marker, point);
-            }
-            arrivee = playbackPoints.get(playbackPoints.size()-1);
-            if (arrivee != null) {
-                Marker arrMarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(arrivee.latitude, arrivee.longitude))
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                pointMarkerMap.put(arrMarker, arrivee);
-            }
-        }
+        Preferences user = MainActivity.user;
+        if(user != null && user.GetLatitude() != 0 && user.GetLongitude() != 0)
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(user.GetLatitude(), user.GetLongitude()), zoomFactor));
 
-        //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(depart.latitude, depart.longitude), zoomFactor));
-
-        /*mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
             @Override
             public View getInfoWindow(Marker marker) {
 
-                PointDeMarquage point = pointMarkerMap.get(marker);
-                if(point == null)
+                Preferences user = pointMarkerMap.get(marker);
+                if(user == null)
                     return null;
                 DecimalFormat df = new DecimalFormat("#.##");
 
@@ -467,51 +278,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 View v = getLayoutInflater().inflate(R.layout.custom_infowindow, null);
 
                 TextView title = (TextView) v.findViewById(R.id.infowindow_title);
-                if(point.depart)
-                    title.setText("Depart");
-                else if(point.arrivee)
-                    title.setText("Arrivee");
-                else
-                    title.setText("Point " + point.index);
+                title.setText(user.GetCourriel());
 
 
-                TextView lat = (TextView) v.findViewById(R.id.infowindow_latitude);
-                String formattedLat = df.format(point.latitude);
-                lat.setText("Latitude : "+formattedLat);
-
-                TextView lng = (TextView) v.findViewById(R.id.infowindow_longitude);
-                String formattedLng = df.format(point.longitude);
-                lng.setText("Longitude : "+formattedLng);
-
-                TextView alt = (TextView) v.findViewById(R.id.infowindow_altitude);
-                String formattedAlt = df.format(point.altitude);
-                alt.setText("Altitude : "+formattedAlt);
-
-                TextView dir = (TextView) v.findViewById(R.id.infowindow_direction);
-                dir.setText("Direction : " + point.direction);
-
-                TextView distRel = (TextView) v.findViewById(R.id.infowindow_distanceRelative);
-                String formattedDistRel = df.format(point.distanceRelative);
-                distRel.setText("Distance Relative : "+formattedDistRel + "m");
-
-                TextView distTot = (TextView) v.findViewById(R.id.infowindow_distanceTotale);
-                String formattedDistTot = df.format(point.distanceTotale);
-                distTot.setText("Distance Totale : "+formattedDistTot + "m");
-
-                TextView mod = (TextView) v.findViewById(R.id.infowindow_modeLocalistion);
-                mod.setText("GPS");
-
-                TextView bat = (TextView) v.findViewById(R.id.infowindow_niveauBatterie);
-                bat.setText("Batterie : " + point.batterieLevel + "%");
-
-                TextView sig = (TextView) v.findViewById(R.id.infowindow_signal);
-                sig.setText("Signal : " + point.signal + " dBm");
-
-                TextView ssid = (TextView) v.findViewById(R.id.infowindow_ssid);
-                ssid.setText("SSID : " + point.ssid);
-
-                TextView bssid = (TextView) v.findViewById(R.id.infowindow_bssid);
-                bssid.setText("BSSID : " + point.bssid);
+                TextView lat = (TextView) v.findViewById(R.id.infowindow_meetingRequest);
+                lat.setText("Meeting not answered");
 
                 return v;
             }
@@ -521,7 +292,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // TODO Auto-generated method stub
                 return null;
             }
-        });*/
+        });
 
         trackingEnabled = true;
         final Handler handler = new Handler();
@@ -571,21 +342,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             RetrievePositionInformation();
         }
     }
-
-    /*@Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }*/
 
     public void onBackPressed() {
         AlertDialog diaBox = AskOption();

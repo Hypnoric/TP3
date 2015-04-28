@@ -80,26 +80,25 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
-
-                String item = ((TextView) view).getText().toString();
-                int index = Integer.parseInt(item);
-                GooglePlace chosenPlace = meetingPlaces.get(index);
+                GooglePlace chosenPlace = meetingPlaces.get((int)id);
                 requestMeeting(chosenPlace);
             }
         });
 
         eventRetriever = new AsyncEventRetriever(getContentResolver());
         eventRetriever.Meeting = this;
-
-        // Run query
-        Uri uri = Calendars.CONTENT_URI;
-        String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
-                + Calendars.ACCOUNT_TYPE + " = ?) AND ("
-                + Calendars.OWNER_ACCOUNT + " = ?))";
-        String[] selectionArgs = new String[] {"sevigny.yanick@gmail.com", "com.google",
-                "sevigny.yanick@gmail.com"};
-        // Submit the query and get a Cursor object back.
-        eventRetriever.startQuery(AsyncEventRetriever.CALENDAR_QUERY, null, uri, AsyncEventRetriever.EVENT_PROJECTION, selection, selectionArgs, null);
+        Preferences user = MainActivity.user;
+        if(user != null && user.GetCourriel() != null){
+            // Run query
+            Uri uri = Calendars.CONTENT_URI;
+            String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
+                    + Calendars.ACCOUNT_TYPE + " = ?) AND ("
+                    + Calendars.OWNER_ACCOUNT + " = ?))";
+            String[] selectionArgs = new String[] {user.GetCourriel(), "com.google",
+                    user.GetCourriel()};
+            // Submit the query and get a Cursor object back.
+            eventRetriever.startQuery(AsyncEventRetriever.CALENDAR_QUERY, null, uri, AsyncEventRetriever.EVENT_PROJECTION, selection, selectionArgs, null);
+        }
     }
 
     private void requestMeeting(GooglePlace place){
@@ -173,7 +172,7 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
         if(places != null && places.size() > 0){
             for(int i = 0; i < places.size(); i++){
                 GooglePlace place = places.get(i);
-                listItems.add("" + i);
+                listItems.add(place.getName());
             }
             meetingPlaces = places;
             adapter.notifyDataSetChanged();
@@ -225,11 +224,6 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
 
     @Override
     public void onLocationChanged(Location location) {
-
-        /*if( mListener != null ) {
-            mListener.onLocationChanged(location);
-        }*/
-
         if (location != null) {
             if(mLastKnownLocation == null){
                 mLastKnownLocation = location;
