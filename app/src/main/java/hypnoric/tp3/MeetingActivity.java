@@ -106,6 +106,8 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
         meeting.SetPlace(place.getName());
         meeting.SetDate("Soon");
         MainActivity.UploadMeetingToDropbox(meeting,getFilesDir().getPath(), this);
+        MainActivity.user.SetMeetingAccepte("True");
+        MainActivity.UploadUserToDropbox(getFilesDir().getPath(), this);
         finish();
     }
 

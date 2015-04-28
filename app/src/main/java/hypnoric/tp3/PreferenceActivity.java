@@ -62,10 +62,13 @@ public class PreferenceActivity extends ActionBarActivity {
         }
         //TextView textPhoto = (TextView)findViewById(R.id.photoText);
         //textPhoto.setText(photoPath);
-        if(!selectedImagePath.equals("")){
+        if(selectedImagePath != null && !selectedImagePath.equals("")){
             Bitmap selectedImage = BitmapFactory.decodeFile(selectedImagePath);
             ImageView photo = (ImageView) findViewById(R.id.photoImg);
             photo.setImageBitmap(selectedImage);
+        }
+        else{
+            selectedImagePath = "";
         }
         TextView textCourriel = (TextView)findViewById(R.id.courrierText);
         textCourriel.setText(courriel);

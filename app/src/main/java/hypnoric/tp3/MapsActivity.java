@@ -245,7 +245,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateMarkers(){
         // Verify if a new meeting as been posted
-        if(MainActivity.isMeetingAccepted().equals("Unknown")){
+        if(MainActivity.isMeetingAccepted().equals("Unknown") || MainActivity.isMeetingAccepted().equals("unknown")){
             if(meetingDialog != null && meetingDialog.isShowing()){
                 meetingDialog.hide();
             }
@@ -256,8 +256,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // Set dialog title
             meetingDialog.setTitle("");
             meetingDialog.setCancelable(false);
+
+            Meeting meeting = MainActivity.GetMeetingFromDropbox();
             TextView text = (TextView)meetingDialog.findViewById(R.id.meeting_place);
-            text.setText("alibaba");
+            text.setText(meeting != null?meeting.GetPlace():"Unknown place");
             Button acceptButton = (Button)meetingDialog.findViewById(R.id.acceptButton);
             acceptButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -311,6 +313,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public View getInfoWindow(Marker marker) {
 
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
                 Preferences user = pointMarkerMap.get(marker);
                 if(user == null)
                     return null;
@@ -330,21 +337,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 else if(user.GetMeetingAccepte().equals("False"))
                     lat.setText("Meeting Refused");
 
-                if(!user.GetPhotoPath().equals("")){
+                /*if(!user.GetPhotoPath().equals("")){
                     Bitmap selectedImage = BitmapFactory.decodeFile(user.GetPhotoPath());
                     if(selectedImage != null){
                         ImageView picture = (ImageView) v.findViewById(R.id.profile_pic);
                         picture.setImageBitmap(selectedImage);
                     }
-                }
+                }*/
 
                 return v;
-            }
-
-            @Override
-            public View getInfoContents(Marker arg0) {
-                // TODO Auto-generated method stub
-                return null;
             }
         });
 
@@ -409,9 +410,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 .setPositiveButton("Oui", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-                        PointDeMarquage points[] = new PointDeMarquage[pointMarkerMap.size()];
-                        points = pointMarkerMap.values().toArray(points);
-                        //MainActivity.addToDataBase(adresseDepart, adresseArrivee, points);
                         finish();
                     }
                 })

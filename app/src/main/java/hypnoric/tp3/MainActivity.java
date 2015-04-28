@@ -142,7 +142,7 @@ public class MainActivity extends ActionBarActivity {
     static public String isMeetingAccepted()
     {
         final String[] accepted = new String[1];
-        accepted[0] = "unknown";
+        accepted[0] = "";
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -240,6 +240,10 @@ public class MainActivity extends ActionBarActivity {
         editor.commit();
         updateUser();
 
+        UploadUserToDropbox(path, currentActivity);
+    }
+
+    public static void UploadUserToDropbox(String path, Activity currentActivity){
         File xmlFile = new File(path + "/" + androidId + ".xml");
         try
         {
@@ -275,7 +279,7 @@ public class MainActivity extends ActionBarActivity {
         UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
         upload.execute();
 
-        //SetResponsesToUnknown(path, currentActivity);
+        SetResponsesToUnknown(path, currentActivity);
     }
 
     public static void SetResponsesToUnknown(String path, Activity currentActivity){
@@ -332,6 +336,7 @@ public class MainActivity extends ActionBarActivity {
                                 String groupe = MainActivity.prefs.getString("groupe", "");
 
                                 if (newUser.GetGroupe().equals(groupe)) {
+                                    newUser.SetMeetingAccepte("Unknown");
                                     users.add(newUser);
                                     paths.add(p);
                                 }
@@ -348,20 +353,22 @@ public class MainActivity extends ActionBarActivity {
                     e.printStackTrace();
                 }
             }
-
-            File xmlFile = new File(path + "/" + paths.get(i));
-            try
-            {
-                Serializer serializer = new Persister();
-                serializer.write(users.get(i), xmlFile);
+            if(paths.size() > 0){
+                File xmlFile = new File(path + "/" + paths.get(0));
+                try
+                {
+                    Serializer serializer = new Persister();
+                    serializer.write(users.get(0), xmlFile);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                paths.clear();
+                users.clear();
+                UploadFileToDropbox upload = new UploadFileToDropbox(mContext, MainActivity.mDBApi, "/tp3/", xmlFile);
+                upload.execute();
             }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-
-            UploadFileToDropbox upload = new UploadFileToDropbox(mContext, MainActivity.mDBApi, "/tp3/", xmlFile);
-            upload.execute();
         }
     }
 
@@ -397,14 +404,14 @@ public class MainActivity extends ActionBarActivity {
     {
         updateUser();
         user.SetMeetingAccepte(value);
-        updatePosition(user.GetLatitude(), user.GetLongitude(), path, currentActivity);
+        MainActivity.UploadUserToDropbox(path, currentActivity);
     }
 
     public static void refuserMeeting(String path, Activity currentActivity)
     {
         updateUser();
         user.SetMeetingAccepte("false");
-        updatePosition(user.GetLatitude(), user.GetLongitude(), path, currentActivity);
+        MainActivity.UploadUserToDropbox(path, currentActivity);
     }
 
     public static void updateUser()

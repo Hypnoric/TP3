@@ -52,12 +52,12 @@ public class UploadFileToDropbox extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean result) {
-        if (result) {
+        /*if (result) {
             Toast.makeText(context, "File Uploaded Sucesfully!",
                     Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(context, "Failed to upload file", Toast.LENGTH_LONG)
                     .show();
-        }
+        }*/
     }
 }

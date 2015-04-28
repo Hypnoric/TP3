@@ -31,7 +31,7 @@ public class AsyncPlaceSearch extends AsyncTask{
     public String latitude = "";
     public String longitude = "";
     public String type = "restaurant";
-    public int radius = 100;
+    public int radius = 200;
 
     public MeetingActivity Meeting;
 
