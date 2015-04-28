@@ -152,7 +152,7 @@ public class PreferenceActivity extends ActionBarActivity {
         double latitude = MainActivity.prefs.getFloat("latitude", 0);
         double longitude = MainActivity.prefs.getFloat("longitude", 0);
         boolean first = MainActivity.prefs.getBoolean("firstTime", false);
-        boolean meeting = false;
+        String meeting = "Unknown";
         if(!first)
             meeting = MainActivity.isMeetingAccepted();
 

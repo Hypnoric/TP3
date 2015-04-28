@@ -13,7 +13,7 @@ public class Preferences
     {
     }
 
-    public Preferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude, boolean meetingAccepte)
+    public Preferences(String photoPath, String courriel, String groupe, boolean restaurant, boolean parc, boolean cinema, double latitude, double longitude, String meetingAccepte)
     {
         SetPhotoPath(photoPath);
         SetCourriel(courriel);
@@ -92,14 +92,14 @@ public class Preferences
     }
 
     @Element
-    private boolean MeetingAccepte;
+    private String MeetingAccepte;
 
-    public boolean GetMeetingAccepte()
+    public String GetMeetingAccepte()
     {
         return MeetingAccepte;
     }
 
-    public void SetMeetingAccepte(boolean meetingAccepte)
+    public void SetMeetingAccepte(String meetingAccepte)
     {
         MeetingAccepte = meetingAccepte;
     }
@@ -155,7 +155,7 @@ public class Preferences
                     && this.Restaurant == inPerson.Restaurant
                     && this.Parc == inPerson.Parc
                     && this.Cinema == inPerson.Cinema
-                    && this.MeetingAccepte == inPerson.MeetingAccepte;
+                    && this.MeetingAccepte.equalsIgnoreCase(inPerson.MeetingAccepte);
         }
         return false;
     }
