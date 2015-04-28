@@ -173,12 +173,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
 
             dernierPointDeMarquage = point;
+            MainActivity.updatePosition(point.latitude, point.longitude, getFilesDir().getPath(),this);
 
             wifi.startScan();
             List<ScanResult> results = wifi.getScanResults();
             if(results.size() > 0)
             {
-                Toast.makeText(getApplicationContext(), "Point d'acces wifi detecte", Toast.LENGTH_SHORT).show();
+                /*Toast.makeText(getApplicationContext(), "Point d'acces wifi detecte", Toast.LENGTH_SHORT).show();
                 for(int i = 0; i < results.size(); ++i)
                 {
                     if(point.signal < results.get(i).level)
@@ -187,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         point.ssid = results.get(i).SSID;
                         point.bssid = results.get(i).BSSID;
                     }
-                }
+                }*/
             }
         }
     }
@@ -213,7 +214,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void refresh(View v){
-        //MainActivity.usersInGroup = MainActivity.getUsersSameGroup();
+        MainActivity.usersInGroup = MainActivity.getUsersSameGroup(MainActivity.androidId);
         updateMarkers();
     }
 
@@ -245,6 +246,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         .position(new LatLng(user.GetLatitude(), user.GetLongitude()))
                                 //.title(markerInfo)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+                pointMarkerMap.put(marker, user);
             }
         }
     }
@@ -272,7 +275,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Preferences user = pointMarkerMap.get(marker);
                 if(user == null)
                     return null;
-                DecimalFormat df = new DecimalFormat("#.##");
 
                 // Getting view from the layout file
                 View v = getLayoutInflater().inflate(R.layout.custom_infowindow, null);
@@ -388,50 +390,4 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return null;
     }
-
-
-    /*public PointDeMarquage getLatLongFromAddress(String youraddress) {
-        youraddress.replace(" ", "%20");
-        String uri = "http://maps.google.com/maps/api/geocode/json?address=" +
-                youraddress + "&sensor=false";
-        HttpGet httpGet = new HttpGet(uri);
-        HttpClient client = new DefaultHttpClient();
-        HttpResponse response;
-        StringBuilder stringBuilder = new StringBuilder();
-
-        try {
-            response = client.execute(httpGet);
-            HttpEntity entity = response.getEntity();
-            InputStream stream = entity.getContent();
-            int b;
-            while ((b = stream.read()) != -1) {
-                stringBuilder.append((char) b);
-            }
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject = new JSONObject(stringBuilder.toString());
-
-            double lng = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
-                    .getJSONObject("geometry").getJSONObject("location")
-                    .getDouble("lng");
-
-            double lat = ((JSONArray)jsonObject.get("results")).getJSONObject(0)
-                    .getJSONObject("geometry").getJSONObject("location")
-                    .getDouble("lat");
-
-            PointDeMarquage point = new PointDeMarquage();
-            point.latitude = lat;
-            point.longitude = lng;
-            return point;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }*/
 }

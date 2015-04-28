@@ -232,6 +232,7 @@ public class MeetingActivity extends ActionBarActivity implements GoogleApiClien
                 asyncPlaceSearch.longitude = "" + mLastKnownLocation.getLongitude();
                 asyncPlaceSearch.Meeting = this;
                 asyncPlaceSearch.execute();
+                MainActivity.updatePosition(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude(), getFilesDir().getPath(),this);
             }
             mLastKnownLocation = location;
         }
