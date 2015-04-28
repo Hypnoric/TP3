@@ -61,6 +61,11 @@ public class MainActivity extends ActionBarActivity {
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         usersInGroup = getUsersSameGroup(androidId);
         updateUser();
+
+        Meeting yolo = new Meeting("yolo", "420");
+        UploadMeetingToDropbox(yolo, getFilesDir().getPath(), this);
+        Meeting test = GetMeetingFromDropbox();
+
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
     }
@@ -107,14 +112,14 @@ public class MainActivity extends ActionBarActivity {
                             //System.out.println("Metadata: " + file);
                             //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
 
-                            Preferences user;
+                            Preferences newUser;
                             Serializer serializer = new Persister();
-                            user = serializer.read(Preferences.class, file);
+                            newUser = serializer.read(Preferences.class, file);
 
                             String groupe = MainActivity.prefs.getString("groupe", "");
 
-                            if (user.GetGroupe().equals(groupe)) {
-                                users.add(user);
+                            if (newUser.GetGroupe().equals(groupe)) {
+                                users.add(newUser);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -220,6 +225,55 @@ public class MainActivity extends ActionBarActivity {
 
         UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
         upload.execute();
+    }
+
+    public static void UploadMeetingToDropbox(Meeting meetingToUpload, String path, Activity currentActivity){
+        /*Comment obtenir path
+        path = getFilesDir().getPath()
+
+        current activity est le this d'ou on appel la fonction
+        currentActivity = this;*/
+        File xmlFile = new File(path + "/meeting.xml");
+        try
+        {
+            Serializer serializer = new Persister();
+            serializer.write(meetingToUpload, xmlFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
+        upload.execute();
+    }
+
+    public static Meeting GetMeetingFromDropbox(){
+        final ArrayList<Meeting> meeting = new ArrayList<Meeting>();
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                    DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/meeting.xml", null, outputStream, null);
+                    String file = new String(outputStream.toByteArray(),"UTF-8");
+
+                    Meeting newMeeting;
+                    Serializer serializer = new Persister();
+                    newMeeting = serializer.read(Meeting.class, file);
+                    meeting.add(newMeeting);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return meeting.get(0);
     }
 
     public static void updateUser()
