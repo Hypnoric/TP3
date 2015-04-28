@@ -15,19 +15,10 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Démarrer l&apos;application"
+            android:text="Afficher la carte"
             android:onClick="openMap"
             android:id="@+id/buttonMap"
             android:layout_gravity="center_horizontal|top"
-            android:layout_marginTop="30dp" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Create meeting"
-            android:onClick="createMeeting"
-            android:id="@+id/buttonMeeting"
-            android:layout_gravity="center"
             android:layout_marginTop="30dp" />
 
         <Button
@@ -46,6 +37,15 @@
             android:id="@+id/buttonQuitter"
             android:layout_gravity="center_horizontal|bottom"
             android:layout_marginBottom="30dp" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Créer une rencontre"
+            android:onClick="createMeeting"
+            android:id="@+id/buttonMeeting"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_marginTop="120dp" />
     </FrameLayout>
 
 </RelativeLayout>
