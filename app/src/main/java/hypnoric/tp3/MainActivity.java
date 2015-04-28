@@ -61,7 +61,6 @@ public class MainActivity extends ActionBarActivity {
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         usersInGroup = getUsersSameGroup(androidId);
         updateUser();
-        boolean test = isMeetingAccepted();
 
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
@@ -135,10 +134,10 @@ public class MainActivity extends ActionBarActivity {
         return  users;
     }
 
-    static public boolean isMeetingAccepted()
+    static public String isMeetingAccepted()
     {
-        final boolean[] accepted = new boolean[1];
-        accepted[0] = false;
+        final String[] accepted = new String[1];
+        accepted[0] = "unknown";
         Thread t = new Thread(new Runnable() {
             public void run() {
                 try {
@@ -306,10 +305,18 @@ public class MainActivity extends ActionBarActivity {
         return meeting.get(0);
     }
 
-    public static void accepterMeeting()
+    public static void accepterMeeting(String path, Activity currentActivity)
     {
         updateUser();
-        user.SetMeetingAccepte(true);
+        user.SetMeetingAccepte("true");
+        updatePosition(user.GetLatitude(), user.GetLongitude(), path, currentActivity);
+    }
+
+    public static void refuserMeeting(String path, Activity currentActivity)
+    {
+        updateUser();
+        user.SetMeetingAccepte("false");
+        updatePosition(user.GetLatitude(), user.GetLongitude(), path, currentActivity);
     }
 
     public static void updateUser()
