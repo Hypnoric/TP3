@@ -44,6 +44,7 @@ public class MainActivity extends ActionBarActivity {
     public static Preferences user;
     public static DropboxAPI.Entry dirent;
     public static String androidId;
+    public static Context mContext;
     //public static DropboxAPI.DropboxFileInfo info;
 
     @Override
@@ -62,6 +63,7 @@ public class MainActivity extends ActionBarActivity {
         usersInGroup = getUsersSameGroup(androidId);
         updateUser();
 
+        mContext = this;
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
     }
@@ -272,6 +274,95 @@ public class MainActivity extends ActionBarActivity {
 
         UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
         upload.execute();
+
+        SetResponsesToUnknown(path, currentActivity);
+    }
+
+    public static void SetResponsesToUnknown(String path, Activity currentActivity){
+        /*Comment obtenir path
+        path = getFilesDir().getPath()
+
+        current activity est le this d'ou on appel la fonction
+        currentActivity = this;*/
+        final ArrayList<Preferences> users = new ArrayList<Preferences>();
+        final ArrayList<String> paths = new ArrayList<String>();
+        androidId = androidId + ".xml";
+        dirent = null;
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    MainActivity.dirent = mDBApi.metadata("/tp3/", 1000, null, true, null);
+                } catch (DropboxException e) {
+                    e.printStackTrace();
+                }
+            }});
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ArrayList<String> files = new ArrayList<String>();
+        for (DropboxAPI.Entry ent: dirent.contents)
+        {
+            files.add(ent.fileName());// Add it to the list of thumbs we can choose from
+        }
+
+        for (int i = 0; i < files.size(); ++i){
+            if(!files.get(i).equals(androidId)) {
+                final String parameter = files.get(i); // the final is important
+                Thread t2 = new Thread(new Runnable() {
+                    String p = parameter;
+                    public void run() {
+                        if(!p.equals("meeting.xml") || !p.contains(".xml")) {
+                            try {
+                                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                                DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/" + p, null, outputStream, null);
+                                String file = new String(outputStream.toByteArray(), "UTF-8");
+                                //System.out.println("Metadata: " + file);
+                                //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+
+                                Preferences newUser;
+                                Serializer serializer = new Persister();
+                                newUser = serializer.read(Preferences.class, file);
+
+                                String groupe = MainActivity.prefs.getString("groupe", "");
+
+                                if (newUser.GetGroupe().equals(groupe)) {
+                                    users.add(newUser);
+                                    paths.add(p);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+                t2.start();
+                try {
+                    t2.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            File xmlFile = new File(path + "/" + paths.get(i));
+            try
+            {
+                Serializer serializer = new Persister();
+                serializer.write(users.get(i), xmlFile);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+
+            UploadFileToDropbox upload = new UploadFileToDropbox(mContext, MainActivity.mDBApi, "/tp3/", xmlFile);
+            upload.execute();
+        }
     }
 
     public static Meeting GetMeetingFromDropbox(){
