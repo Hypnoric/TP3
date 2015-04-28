@@ -62,10 +62,6 @@ public class MainActivity extends ActionBarActivity {
         usersInGroup = getUsersSameGroup(androidId);
         updateUser();
 
-        Meeting yolo = new Meeting("yolo", "420");
-        UploadMeetingToDropbox(yolo, getFilesDir().getPath(), this);
-        Meeting test = GetMeetingFromDropbox();
-
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
     }
