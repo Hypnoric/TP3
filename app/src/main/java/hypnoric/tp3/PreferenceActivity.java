@@ -151,8 +151,16 @@ public class PreferenceActivity extends ActionBarActivity {
 
         double latitude = MainActivity.prefs.getFloat("latitude", 0);
         double longitude = MainActivity.prefs.getFloat("longitude", 0);
+        boolean first = MainActivity.prefs.getBoolean("firstTime", false);
+        boolean meeting = false;
+        if(!first)
+            meeting = MainActivity.isMeetingAccepted();
 
-        Preferences preferencesUser = new Preferences(selectedImagePath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
+        Preferences preferencesUser;
+        if (selectedImagePath.equals(""))
+            preferencesUser = new Preferences("null", courriel, groupe, restaurant, parc, cinema, latitude, longitude, meeting);
+        else
+            preferencesUser = new Preferences(selectedImagePath, courriel, groupe, restaurant, parc, cinema, latitude, longitude, meeting);
         File xmlFile = new File(getFilesDir().getPath() + "/" + MainActivity.androidId + ".xml");
 
         try
