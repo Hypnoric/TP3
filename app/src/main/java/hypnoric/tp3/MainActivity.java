@@ -61,6 +61,7 @@ public class MainActivity extends ActionBarActivity {
                 this.getContentResolver(), Settings.Secure.ANDROID_ID);
         usersInGroup = getUsersSameGroup(androidId);
         updateUser();
+        boolean test = isMeetingAccepted();
 
         firstTime = prefs.getBoolean("firstTime", true);
         nextStep();
@@ -132,6 +133,38 @@ public class MainActivity extends ActionBarActivity {
             }
         }
         return  users;
+    }
+
+    static public boolean isMeetingAccepted()
+    {
+        final boolean[] accepted = new boolean[1];
+        accepted[0] = false;
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+                    DropboxAPI.DropboxFileInfo info = mDBApi.getFile("/tp3/" + androidId + ".xml", null, outputStream, null);
+                    String file = new String(outputStream.toByteArray(), "UTF-8");
+                    //System.out.println("Metadata: " + file);
+                    //Log.i("DbExampleLog", "The file's rev is: " + info.getMetadata().rev);
+
+                    Preferences newUser;
+                    Serializer serializer = new Persister();
+                    newUser = serializer.read(Preferences.class, file);
+                    accepted[0] = newUser.GetMeetingAccepte();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        t.start();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return accepted[0];
     }
 
     @Override
@@ -273,6 +306,12 @@ public class MainActivity extends ActionBarActivity {
         return meeting.get(0);
     }
 
+    public static void accepterMeeting()
+    {
+        updateUser();
+        user.SetMeetingAccepte(true);
+    }
+
     public static void updateUser()
     {
         String photoPath = prefs.getString("photoPath", "");
@@ -285,7 +324,7 @@ public class MainActivity extends ActionBarActivity {
         float longitude = prefs.getFloat("longitude", 0);
         if (photoPath.equals(""))
             photoPath = "null";
-        user = new Preferences(photoPath, courriel, groupe, restaurant, parc, cinema, latitude, longitude);
+        user = new Preferences(photoPath, courriel, groupe, restaurant, parc, cinema, latitude, longitude, MainActivity.isMeetingAccepted());
     }
 
     @Override
