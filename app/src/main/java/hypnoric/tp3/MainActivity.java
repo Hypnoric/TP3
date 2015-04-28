@@ -302,10 +302,10 @@ public class MainActivity extends ActionBarActivity {
         return meeting.get(0);
     }
 
-    public static void accepterMeeting(String path, Activity currentActivity)
+    public static void accepterMeeting(String value, String path, Activity currentActivity)
     {
         updateUser();
-        user.SetMeetingAccepte("true");
+        user.SetMeetingAccepte(value);
         updatePosition(user.GetLatitude(), user.GetLongitude(), path, currentActivity);
     }
 

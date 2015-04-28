@@ -1,11 +1,14 @@
 package hypnoric.tp3;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
@@ -18,6 +21,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private WifiManager wifi;
     private boolean playbackMode = false;
     private int numeroTrajet;
+    private Dialog meetingDialog;
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -238,6 +244,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateMarkers(){
+        // Verify if a new meeting as been posted
+        if(MainActivity.isMeetingAccepted().equals("Unknown")){
+            if(meetingDialog != null && meetingDialog.isShowing()){
+                meetingDialog.hide();
+            }
+            // Create custom dialog object
+            meetingDialog = new Dialog(MapsActivity.this);
+            // Include dialog.xml file
+            meetingDialog.setContentView(R.layout.dialog_meeting);
+            // Set dialog title
+            meetingDialog.setTitle("");
+            meetingDialog.setCancelable(false);
+            TextView text = (TextView)meetingDialog.findViewById(R.id.meeting_place);
+            text.setText("alibaba");
+            Button acceptButton = (Button)meetingDialog.findViewById(R.id.acceptButton);
+            acceptButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity.accepterMeeting("True", getFilesDir().getPath(), MapsActivity.this);
+                    meetingDialog.hide();
+                }
+            });
+            Button refuseButton = (Button)meetingDialog.findViewById(R.id.refuseButton);
+            refuseButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity.accepterMeeting("False", getFilesDir().getPath(), MapsActivity.this);
+                    meetingDialog.hide();
+                }
+            });
+            meetingDialog.show();
+        }
+
         mMap.clear();
         ArrayList<Preferences> users = MainActivity.usersInGroup;
         if(users != null && users.size() > 1){
@@ -284,7 +323,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 TextView lat = (TextView) v.findViewById(R.id.infowindow_meetingRequest);
-                lat.setText("Meeting not answered");
+                if(user.GetMeetingAccepte().equals("Unknown"))
+                    lat.setText("Meeting not answered");
+                else if(user.GetMeetingAccepte().equals("True"))
+                    lat.setText("Meeting Accepted");
+                else if(user.GetMeetingAccepte().equals("False"))
+                    lat.setText("Meeting Refused");
+
+                if(!user.GetPhotoPath().equals("")){
+                    Bitmap selectedImage = BitmapFactory.decodeFile(user.GetPhotoPath());
+                    if(selectedImage != null){
+                        ImageView picture = (ImageView) v.findViewById(R.id.profile_pic);
+                        picture.setImageBitmap(selectedImage);
+                    }
+                }
 
                 return v;
             }
