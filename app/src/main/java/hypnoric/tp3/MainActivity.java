@@ -275,7 +275,7 @@ public class MainActivity extends ActionBarActivity {
         UploadFileToDropbox upload = new UploadFileToDropbox(currentActivity, MainActivity.mDBApi, "/tp3/", xmlFile);
         upload.execute();
 
-        SetResponsesToUnknown(path, currentActivity);
+        //SetResponsesToUnknown(path, currentActivity);
     }
 
     public static void SetResponsesToUnknown(String path, Activity currentActivity){
